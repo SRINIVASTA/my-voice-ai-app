@@ -83,11 +83,35 @@ def load_database_data():
 st.sidebar.header("🕹️ Simulation Control Tower")
 st.sidebar.write("Click below to simulate generating call metrics on the cloud server.")
 
+# Button 1: Launch the Asynchronous Calling Loop Simulation
 if st.sidebar.button("🚀 Launch 15 Concurrent Calls (1 Min Max)"):
     with st.spinner("Simulating live connections across hardware SIM channels..."):
         # Run the async loop inside the Streamlit context
         asyncio.run(run_batch_simulation())
     st.sidebar.success("🎉 Batch Completed & Archived!")
+    # Force a quick page reload to show new visual metrics immediately
+    st.rerun()
+
+st.sidebar.markdown("---")
+st.sidebar.write("Database Maintenance Options:")
+
+# Button 2: Completely Clear the Local SQLite Data Records
+if st.sidebar.button("🗑️ Clear All Database Data", type="secondary"):
+    try:
+        conn = sqlite3.connect(DB_NAME)
+        cursor = conn.cursor()
+        
+        # This wipes out every row inside the table without destroying the schema setup
+        cursor.execute("DELETE FROM calls")
+        
+        conn.commit()
+        conn.close()
+        st.sidebar.success("🧹 Database cleared successfully!")
+        
+        # Instantly wipe the dashboard view and push charts back to zero
+        st.rerun()
+    except Exception as e:
+        st.sidebar.error(f"Error clearing data: {e}")
 
 # --- RENDERING DASHBOARD DATA ---
 df = load_database_data()
